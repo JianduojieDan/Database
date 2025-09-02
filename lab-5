@@ -1,0 +1,32 @@
+Last login: Tue Sep  2 11:14:16 on ttys000
+(base) Zhuanz@MacBookPro ~ % psql -d mysb -U Dan -h localhost
+psql: error: connection to server at "localhost" (::1), port 5432 failed: FATAL:  database "mysb" does not exist
+(base) Zhuanz@MacBookPro ~ % psql -d mydb -U Dan -h localhost
+psql (14.19 (Homebrew))
+Type "help" for help.
+
+mydb=# CREATE DATABSE university;
+ERROR:  syntax error at or near "DATABSE"
+LINE 1: CREATE DATABSE university;
+               ^
+mydb=# CREATE DATABASE university;
+CREATE DATABASE
+mydb=# DROP DATABASE university;
+DROP DATABASE
+mydb=# CREATE DATABASE university;
+CREATE DATABASE
+mydb=# \c university;
+You are now connected to database "university" as user "Dan".
+university=# psql -U Dan -d university;
+ERROR:  syntax error at or near "psql"
+LINE 1: psql -U Dan -d university;
+        ^
+university=# \c mydb;
+You are now connected to database "mydb" as user "Dan".
+mydb=# psql -U Dan -d university;
+ERROR:  syntax error at or near "psql"
+LINE 1: psql -U Dan -d university;
+        ^
+mydb=# \c university;
+You are now connected to database "university" as user "Dan".
+university=# 
