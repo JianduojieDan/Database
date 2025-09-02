@@ -1,0 +1,165 @@
+Last login: Tue Sep  2 11:14:16 on ttys000
+(base) Zhuanz@MacBookPro ~ % psql -d mysb -U Dan -h localhost
+psql: error: connection to server at "localhost" (::1), port 5432 failed: FATAL:  database "mysb" does not exist
+(base) Zhuanz@MacBookPro ~ % psql -d mydb -U Dan -h localhost
+psql (14.19 (Homebrew))
+Type "help" for help.
+
+mydb=# CREATE DATABSE university;
+ERROR:  syntax error at or near "DATABSE"
+LINE 1: CREATE DATABSE university;
+               ^
+mydb=# CREATE DATABASE university;
+CREATE DATABASE
+mydb=# DROP DATABASE university;
+DROP DATABASE
+mydb=# CREATE DATABASE university;
+CREATE DATABASE
+mydb=# \c university;
+You are now connected to database "university" as user "Dan".
+university=# psql -U Dan -d university;
+ERROR:  syntax error at or near "psql"
+LINE 1: psql -U Dan -d university;
+        ^
+university=# \c mydb;
+You are now connected to database "mydb" as user "Dan".
+mydb=# psql -U Dan -d university;
+ERROR:  syntax error at or near "psql"
+LINE 1: psql -U Dan -d university;
+        ^
+mydb=# \c university;
+You are now connected to database "university" as user "Dan".
+university=# CREATE TABLE students(
+university(# students_id SERIAL PRIMARY KEY,
+university(# fitst_name VARCHAR(50) NOT NULL,
+university(# last_name VARCHAR(50) NOT NULL,
+university(# email VARCHAR(100) UNIQUE NOT NULL,
+university(# faculty VARCHAR(100));
+CREATE TABLE
+university=# DROP TABLE IF EXISTS this_table_is_not;
+NOTICE:  table "this_table_is_not" does not exist, skipping
+DROP TABLE
+university=# ALETR TABLE university;
+ERROR:  syntax error at or near "ALETR"
+LINE 1: ALETR TABLE university;
+        ^
+university=# ALTER TABLE university;
+ERROR:  syntax error at or near ";"
+LINE 1: ALTER TABLE university;
+                              ^
+university=# ALTER TABLE university
+university-# ADD COLUMN date_of_birth DATE;
+ERROR:  relation "university" does not exist
+university=# ALTER TABLE students
+university-# ADD COLUMN date_of_birth DATE;
+ALTER TABLE
+university=# SELECT * FORM students;
+ERROR:  syntax error at or near "FORM"
+LINE 1: SELECT * FORM students;
+                 ^
+university=# SELECT * FROM students;
+ students_id | fitst_name | last_name | email | faculty | date_of_birth 
+-------------+------------+-----------+-------+---------+---------------
+(0 rows)
+
+university=# ALTER TABLE students
+university-# DROP COLUMN faculty;
+ALTER TABLE
+university=# SELECT * FROM students;
+ students_id | fitst_name | last_name | email | date_of_birth 
+-------------+------------+-----------+-------+---------------
+(0 rows)
+
+university=# ALTER TABLE students
+university-# ALTER COLUMN first_name TYPE TEXT;
+ERROR:  column "first_name" of relation "students" does not exist
+university=# ALTER TABLE students
+ALTER COLUMN first_name NAME first_name;
+ERROR:  syntax error at or near "NAME"
+LINE 2: ALTER COLUMN first_name NAME first_name;
+                                ^
+university=# ALTER TABLE students
+university-# ALTER COLUMN first_name RENAME TO first_name;
+ERROR:  syntax error at or near "RENAME"
+LINE 2: ALTER COLUMN first_name RENAME TO first_name;
+                                ^
+university=# ALTER TABLE students
+ALTER COLUMN fitst_name RENAME TO first_name;
+ERROR:  syntax error at or near "RENAME"
+LINE 2: ALTER COLUMN fitst_name RENAME TO first_name;
+                                ^
+university=# ALTER TABLE students
+RENAME COLUMN fitst_name TO first_name;
+ALTER TABLE
+university=# SELECT * FROM students;
+ students_id | first_name | last_name | email | date_of_birth 
+-------------+------------+-----------+-------+---------------
+(0 rows)
+
+university=# ALTER TABLE students
+ALTER COLUMN first_name TYPE TEXT;
+ALTER TABLE
+university=# ALTER TABLE students
+ADD CONSTRAINT unique_student_email UNIQUE (email);
+ALTER TABLE
+university=# ALTER TABLE students
+RENAME COLUMN email TO email_adress;
+ALTER TABLE
+university=# ALTER TABLE students
+university-# RENAME TO university_students;
+ALTER TABLE
+university=# CREATE TEMP TABLE temp_table_name (
+university(# columu_1 datatype);
+ERROR:  type "datatype" does not exist
+LINE 2: columu_1 datatype);
+                 ^
+university=# CREATE TEMP TABLE temp_table_name (
+columu1 datatype);
+ERROR:  type "datatype" does not exist
+LINE 2: columu1 datatype);
+                ^
+university=# CREATE TEMP TABLE temp_table_name (
+columu1 datatype,);
+ERROR:  syntax error at or near ")"
+LINE 2: columu1 datatype,);
+                         ^
+university=# CREATE TEMP TABLE temp_table_name (
+columu1 INT,
+university(# column2 TEXT,
+university(# column3 CARCHAR(400),
+university(# columu4 DATE,
+university(# );
+ERROR:  syntax error at or near ")"
+LINE 6: );
+        ^
+university=# CREATE TEMP TABLE temp_table_name (
+columu1 INT,
+column2 TEXT,
+column3 CARCHAR(400),
+columu4 DATE 
+);
+ERROR:  type "carchar" does not exist
+LINE 4: column3 CARCHAR(400),
+                ^
+university=# CREATE TEMP TABLE temp_table_name (
+columu1 INT,
+column2 TEXT,
+column3 VARCHAR(400),
+columu4 DATE
+);
+CREATE TABLE
+university=# \dt+
+                                            List of relations
+  Schema   |        Name         | Type  | Owner | Persistence | Access method |    Size    | Description 
+-----------+---------------------+-------+-------+-------------+---------------+------------+-------------
+ pg_temp_6 | temp_table_name     | table | Dan   | temporary   | heap          | 8192 bytes | 
+ public    | university_students | table | Dan   | permanent   | heap          | 8192 bytes | 
+(2 rows)
+
+...skipping...
+                                            List of relations
+  Schema   |        Name         | Type  | Owner | Persistence | Access method |    Size    | Description 
+-----------+---------------------+-------+-------+-------------+---------------+------------+-------------
+ pg_temp_6 | temp_table_name     | table | Dan   | temporary   | heap          | 8192 bytes | 
+ public    | university_students | table | Dan   | permanent   | heap          | 8192 bytes | 
+(2 rows)
