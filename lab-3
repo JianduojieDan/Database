@@ -1,0 +1,33 @@
+Last login: Sat Aug 30 16:40:55 on ttys000
+(base) Zhuanz@MacBookPro ~ % psql -h localhost -U Dan -d mtdb
+psql: error: connection to server at "localhost" (::1), port 5432 failed: FATAL:  database "mtdb" does not exist
+(base) Zhuanz@MacBookPro ~ % psql -h localhost -U Dan -d mydb
+psql (14.19 (Homebrew))
+Type "help" for help.
+
+mydb=# ls -la
+mydb-# psql ls -A
+mydb-# /l
+mydb-# \l
+                             List of databases
+   Name    |  Owner   | Encoding | Collate | Ctype |   Access privileges   
+-----------+----------+----------+---------+-------+-----------------------
+ mydb      | Dan      | UTF8     | C       | C     | 
+ postgres  | postgres | UTF8     | C       | C     | 
+ template0 | postgres | UTF8     | C       | C     | =c/postgres          +
+           |          |          |         |       | postgres=CTc/postgres
+ template1 | postgres | UTF8     | C       | C     | =c/postgres          +
+           |          |          |         |       | postgres=CTc/postgres
+(4 rows)
+
+mydb-# \dt
+         List of relations
+ Schema |   Name   | Type  | Owner 
+--------+----------+-------+-------
+ public | students | table | Dan
+(1 row)
+
+mydb-# /q
+mydb-# \q
+(base) Zhuanz@MacBookPro ~ % 
+(base) Zhuanz@MacBookPro ~ % 
