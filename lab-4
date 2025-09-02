@@ -1,0 +1,130 @@
+Last login: Tue Sep  2 10:59:29 on ttys000
+(base) Zhuanz@MacBookPro ~ % psql -h localhost -U Dan -d mydb
+psql (14.19 (Homebrew))
+Type "help" for help.
+
+mydb=# CREATE TABLE students {
+mydb-# student_id INT,
+mydb-# name VARCHAR(50),
+mydb-# email VARCHAR(100),
+mydb-#  faculty VARCHAR(50)
+mydb-# };
+ERROR:  syntax error at or near "{"
+LINE 1: CREATE TABLE students {
+                              ^
+mydb=# CREATE TABLE students (
+  student_id INT,
+  name VARCHAR(50),
+  email VARCHAR(100),
+  faculty VARCHAR(50)
+);
+ERROR:  relation "students" already exists
+mydb=# DROP TABLE students
+mydb-# CREATE TABLE students (
+  student_id INT,
+  name VARCHAR(50),
+  email VARCHAR(100),
+  faculty VARCHAR(50)
+);
+ERROR:  syntax error at or near "CREATE"
+LINE 2: CREATE TABLE students (
+        ^
+mydb=# DROP TABLE students;
+DROP TABLE
+mydb=# CREATE TABLE students (
+  student_id INT,
+  name VARCHAR(50),
+  email VARCHAR(100),
+  faculty VARCHAR(50)
+);
+CREATE TABLE
+mydb=# INSERT INTO students (student_id, name, email, faculty)
+VALUES 
+  (1, 'Alymbek', 'alymbek@example.com', 'COMSEH'),
+  (2, 'Timur', 'timur@example.com', 'MED'),
+  (3, 'Beka', 'beka@example.com', 'MAT');
+INSERT 0 3
+mydb=# SELECT * FROM students;
+ student_id |  name   |        email        | faculty 
+------------+---------+---------------------+---------
+          1 | Alymbek | alymbek@example.com | COMSEH
+          2 | Timur   | timur@example.com   | MED
+          3 | Beka    | beka@example.com    | MAT
+(3 rows)
+
+mydb=# SELECT * NAME, EMAIL FROM students;
+ERROR:  syntax error at or near "NAME"
+LINE 1: SELECT * NAME, EMAIL FROM students;
+                 ^
+mydb=# SELECT * name FROM students;
+ERROR:  syntax error at or near "name"
+LINE 1: SELECT * name FROM students;
+                 ^
+mydb=# SELECT name, email FROM students;
+  name   |        email        
+---------+---------------------
+ Alymbek | alymbek@example.com
+ Timur   | timur@example.com
+ Beka    | beka@example.com
+(3 rows)
+
+mydb=# SELECT name, email FROM students WHERE faculty = 'MED'
+mydb-# 
+mydb-# ;
+ name  |       email       
+-------+-------------------
+ Timur | timur@example.com
+(1 row)
+
+mydb=# SELECT name, email,faculty FROM students WHERE faculty = 'MED'
+;
+ name  |       email       | faculty 
+-------+-------------------+---------
+ Timur | timur@example.com | MED
+(1 row)
+
+mydb=# SELECT * FROM name WHERE name  = 'Beka';
+ERROR:  relation "name" does not exist
+LINE 1: SELECT * FROM name WHERE name  = 'Beka';
+                      ^
+mydb=# SELECT * FROM students WHERE name  = 'Beka';
+ student_id | name |      email       | faculty 
+------------+------+------------------+---------
+          3 | Beka | beka@example.com | MAT
+(1 row)
+
+mydb=# WITH numbered_students AS (
+  SELECT name, ROW_NUMBER() OVER (ORDER BY name) AS new_id
+  FROM students
+)
+UPDATE students s
+SET student_id = ns.new_id
+FROM numbered_students ns
+WHERE s.name = ns.name;
+UPDATE 3
+mydb=# SELECT name, email FROM students ORDER BY;
+ERROR:  syntax error at or near ";"
+LINE 1: SELECT name, email FROM students ORDER BY;
+                                                 ^
+mydb=# SELECT name, email FROM students ORDER BY;
+ERROR:  syntax error at or near ";"
+LINE 1: SELECT name, email FROM students ORDER BY;
+                                                 ^
+mydb=# SELECT name, email FROM students ORDER BY student_id;
+  name   |        email        
+---------+---------------------
+ Alymbek | alymbek@example.com
+ Beka    | beka@example.com
+ Timur   | timur@example.com
+(3 rows)
+
+mydb=# SELECT name, email FROM students ORDER BY student_id LIMIT 2;
+  name   |        email        
+---------+---------------------
+ Alymbek | alymbek@example.com
+ Beka    | beka@example.com
+(2 rows)
+
+mydb=# /* this is a multi-line comment.
+mydb*# It can mutiple lines for detailed explanations.*/
+mydb-# 
