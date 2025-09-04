@@ -1,0 +1,225 @@
+psql (17.5, server 14.19 (Homebrew))
+Type "help" for help.
+
+university=# ls
+university-# ls -la
+university-# ls -l
+university-# man man
+university-# -U Dan -h localhost -d university
+university-# \l
+                                                 List of databases
+    Name    |  Owner   | Encoding | Locale Provider | Collate | Ctype | Locale | ICU Rules |   Access privileges   
+------------+----------+----------+-----------------+---------+-------+--------+-----------+-----------------------
+ mydb       | Dan      | UTF8     | libc            | C       | C     |        |           | 
+ postgres   | postgres | UTF8     | libc            | C       | C     |        |           | 
+ template0  | postgres | UTF8     | libc            | C       | C     |        |           | =c/postgres          +
+            |          |          |                 |         |       |        |           | postgres=CTc/postgres
+ template1  | postgres | UTF8     | libc            | C       | C     |        |           | =c/postgres          +
+            |          |          |                 |         |       |        |           | postgres=CTc/postgres
+ university | Dan      | UTF8     | libc            | C       | C     |        |           | 
+(5 rows)
+
+university-# 
+university-# \c dbname
+connection to server at "localhost" (::1), port 5432 failed: FATAL:  database "dbname" does not exist
+Previous connection kept
+university-# \?
+General
+  \bind [PARAM]...       set query parameters
+  \copyright             show PostgreSQL usage and distribution terms
+  \crosstabview [COLUMNS] execute query and display result in crosstab
+  \errverbose            show most recent error message at maximum verbosity
+  \g [(OPTIONS)] [FILE]  execute query (and send result to file or |pipe);
+                         \g with no arguments is equivalent to a semicolon
+  \gdesc                 describe result of query, without executing it
+  \gexec                 execute query, then execute each value in its result
+  \gset [PREFIX]         execute query and store result in psql variables
+  \gx [(OPTIONS)] [FILE] as \g, but forces expanded output mode
+  \q                     quit psql
+  \watch [[i=]SEC] [c=N] [m=MIN]
+                         execute query every SEC seconds, up to N times,
+                         stop if less than MIN rows are returned
+
+Help
+  \? [commands]          show help on backslash commands
+  \? options             show help on psql command-line options
+  \? variables           show help on special variables
+  \h [NAME]              help on syntax of SQL commands, * for all commands
+
+Query Buffer
+  \e [FILE] [LINE]       edit the query buffer (or file) with external editor
+  \ef [FUNCNAME [LINE]]  edit function definition with external editor
+  \ev [VIEWNAME [LINE]]  edit view definition with external editor
+  \p                     show the contents of the query buffer
+  \r                     reset (clear) the query buffer
+  \s [FILE]              display history or save it to file
+  \w FILE                write query buffer to file
+
+Input/Output
+  \copy ...              perform SQL COPY with data stream to the client host
+  \echo [-n] [STRING]    write string to standard output (-n for no newline)
+  \i FILE                execute commands from file
+  \ir FILE               as \i, but relative to location of current script
+  \o [FILE]              send all query results to file or |pipe
+  \qecho [-n] [STRING]   write string to \o output stream (-n for no newline)
+  \warn [-n] [STRING]    write string to standard error (-n for no newline)
+
+Conditional
+  \if EXPR               begin conditional block
+  \elif EXPR             alternative within current conditional block
+  \else                  final alternative within current conditional block
+  \endif                 end conditional block
+
+Informational
+  (options: S = show system objects, + = additional detail)
+  \d[S+]                 list tables, views, and sequences
+  \d[S+]  NAME           describe table, view, sequence, or index
+  \da[S]  [PATTERN]      list aggregates
+  \dA[+]  [PATTERN]      list access methods
+  \dAc[+] [AMPTRN [TYPEPTRN]]  list operator classes
+  \dAf[+] [AMPTRN [TYPEPTRN]]  list operator families
+  \dAo[+] [AMPTRN [OPFPTRN]]   list operators of operator families
+  \dAp[+] [AMPTRN [OPFPTRN]]   list support functions of operator families
+  \db[+]  [PATTERN]      list tablespaces
+  \dc[S+] [PATTERN]      list conversions
+  \dconfig[+] [PATTERN]  list configuration parameters
+  \dC[+]  [PATTERN]      list casts
+  \dd[S]  [PATTERN]      show object descriptions not displayed elsewhere
+  \dD[S+] [PATTERN]      list domains
+  \ddp    [PATTERN]      list default privileges
+  \dE[S+] [PATTERN]      list foreign tables
+  \des[+] [PATTERN]      list foreign servers
+  \det[+] [PATTERN]      list foreign tables
+  \deu[+] [PATTERN]      list user mappings
+  \dew[+] [PATTERN]      list foreign-data wrappers
+  \df[anptw][S+] [FUNCPTRN [TYPEPTRN ...]]
+                         list [only agg/normal/procedure/trigger/window] functions
+  \dF[+]  [PATTERN]      list text search configurations
+  \dFd[+] [PATTERN]      list text search dictionaries
+  \dFp[+] [PATTERN]      list text search parsers
+  \dFt[+] [PATTERN]      list text search templates
+  \dg[S+] [PATTERN]      list roles
+  \di[S+] [PATTERN]      list indexes
+  \dl[+]                 list large objects, same as \lo_list
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# 
+university-# \l
+                                                 List of databases
+    Name    |  Owner   | Encoding | Locale Provider | Collate | Ctype | Locale | ICU Rules |   Access privileges   
+------------+----------+----------+-----------------+---------+-------+--------+-----------+-----------------------
+ mydb       | Dan      | UTF8     | libc            | C       | C     |        |           | 
+ postgres   | postgres | UTF8     | libc            | C       | C     |        |           | 
+ template0  | postgres | UTF8     | libc            | C       | C     |        |           | =c/postgres          +
+            |          |          |                 |         |       |        |           | postgres=CTc/postgres
+ template1  | postgres | UTF8     | libc            | C       | C     |        |           | =c/postgres          +
+            |          |          |                 |         |       |        |           | postgres=CTc/postgres
+ university | Dan      | UTF8     | libc            | C       | C     |        |           | 
+(5 rows)
+
+university-# \dt
+              List of relations
+ Schema |        Name         | Type  | Owner 
+--------+---------------------+-------+-------
+ public | university_students | table | Dan
+(1 row)
+
+university-# \dt
+              List of relations
+ Schema |        Name         | Type  | Owner 
+--------+---------------------+-------+-------
+ public | course_enrollments  | table | Dan
+ public | students            | table | Dan
+ public | university_students | table | Dan
+(3 rows)
+
+university-# SELECT * FROM course_enrollments
+university-# ;
+ERROR:  syntax error at or near "ls"
+LINE 1: ls
+        ^
+university=# SELECT * FROM course_enrollments                                            
+university-# ;
+ student_id | course_id | semester  | enrollment_date | grade 
+------------+-----------+-----------+-----------------+-------
+       1001 |      2001 | Fall 2023 | 2025-09-04      | A 
+       1001 |      2002 | Fall 2023 | 2025-09-04      | B+
+       1002 |      2001 | Fall 2023 | 2025-09-04      | B 
+       1002 |      2003 | Fall 2023 | 2025-09-04      | A-
+       1003 |      2002 | Fall 2023 | 2025-09-04      | B 
+       1004 |      2001 | Fall 2023 | 2025-09-04      | C+
+       1005 |      2004 | Fall 2023 | 2025-09-04      | A 
+       1006 |      2001 | Fall 2023 | 2025-09-04      | B-
+       1007 |      2003 | Fall 2023 | 2025-09-04      | A 
+       1008 |      2002 | Fall 2023 | 2025-09-04      | C 
+       1009 |      2004 | Fall 2023 | 2025-09-04      | B+
+       1010 |      2001 | Fall 2023 | 2025-09-04      | A-
+(12 rows)
+
+university=# \dt
+              List of relations
+ Schema |        Name         | Type  | Owner 
+--------+---------------------+-------+-------
+ public | course_enrollments  | table | Dan
+ public | products            | table | Dan
+ public | students            | table | Dan
+ public | university_students | table | Dan
+(4 rows)
+
+university=# SELECT * FROM products
+university-# ;
+ product_id | product_name | price 
+------------+--------------+-------
+(0 rows)
+
+university=# SELECT * FROM products;                                                     
+ product_id |  product_name  | price  
+------------+----------------+--------
+          1 | 无线蓝牙耳机   |  299.9
+          2 | 智能手表       |  899.0
+          3 | 机械键盘       |  349.9
+          4 | 高清投影仪     | 2499.5
+          5 | 便携式充电宝   |  129.9
+          6 | 游戏鼠标       |  199.0
+          7 | 平板电脑       | 2799.9
+          8 | 蓝牙音箱       |  499.5
+          9 | 笔记本散热底座 |   89.9
+         10 | 智能手环       |  159.0
+(10 rows)
+
+university=# SELECT * FROM products LIMIT 100;
+ product_id |  product_name  | price  
+------------+----------------+--------
+          1 | 无线蓝牙耳机   |  299.9
+          2 | 智能手表       |  899.0
+          3 | 机械键盘       |  349.9
+          4 | 高清投影仪     | 2499.5
+          5 | 便携式充电宝   |  129.9
+          6 | 游戏鼠标       |  199.0
+          7 | 平板电脑       | 2799.9
+          8 | 蓝牙音箱       |  499.5
+          9 | 笔记本散热底座 |   89.9
+         10 | 智能手环       |  159.0
+(10 rows)
