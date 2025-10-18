@@ -1,0 +1,64 @@
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS customers CASCADE;
+DROP TABLE IF EXISTS products;
+
+
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    quantity INT NOT NULL CHECK (quantity >= 0)
+);
+
+
+CREATE TABLE customers (
+    customer_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE
+);
+
+
+CREATE TABLE orders (
+    purchase_history_id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL REFERENCES customers(customer_id),
+    product_id INT NOT NULL REFERENCES products(product_id),
+    quantity INT NOT NULL CHECK (quantity > 0),
+    purchase_price NUMERIC(10, 2) NOT NULL,
+    order_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+INSERT INTO customers (first_name, last_name, email) VALUES
+('Alice', 'Smith', 'alice@example.com'),
+('Bob', 'Jones', 'bob@example.com');
+
+INSERT INTO products (product_id, name, price, quantity) VALUES
+(5, 'Premium Widget', 10.00, 15),
+(6, 'Basic Gadget', 5.00, 50);
+
+SELECT * FROM customers;
+SELECT * FROM products;
+
+
+BEGIN;
+
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+INSERT INTO orders (customer_id, product_id, quantity, purchase_price)
+VALUES (1, 5, 5, 10.00);
+
+SAVEPOINT core_order_recorded;
+
+UPDATE products SET quantity = quantity - 5 WHERE product_id = 5;
+
+ROLLBACK TO SAVEPOINT core_order_recorded;
+
+UPDATE products SET quantity = quantity - 5 WHERE product_id = 5;
+
+RELEASE SAVEPOINT core_order_recorded;
+
+COMMIT;
+
+SELECT * FROM products WHERE product_id = 5;
+SELECT * FROM orders WHERE customer_id = 1;
