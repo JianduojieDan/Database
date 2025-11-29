@@ -96,6 +96,7 @@ After running the script, the system produced the following results, closing the
     * *Database Proof:* `SELECT COUNT(*) FROM stock_movements` returned **5 records**, each with a change of `-1`.
 
 ---
+<img width="1312" height="739" alt="Screenshot 2025-11-29 at 22 49 47" src="https://github.com/user-attachments/assets/60890268-18b9-43a8-9d61-1ed33979c011" />
 
 ## 4. How to Run This Project
 
