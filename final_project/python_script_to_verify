@@ -5,7 +5,7 @@ import time
 DB_PARAMS = {
     "dbname": "wms_project",
     "user": "Dan",
-    "password": "a2296957743A",
+    "password": "********",
     "host": "localhost",
     "port": "5432"
 }
