@@ -1,148 +1,123 @@
 # 📦 Real-Time Warehouse Management System (WMS)
 
-🎯 Project Objective
+## Project Overview
 
-The goal of this project is to design and implement a concurrency-safe database system for real-time warehouse inventory management.
-The system must satisfy three critical guarantees:
+The objective of this project is to design and implement a high-concurrency, transaction-safe database backend for real-time warehouse inventory management using PostgreSQL and Python.
 
-✅ No Overselling: Stock quantities must never become negative.
+In a real-world e-commerce environment, a critical challenge is the **"Race Condition,"** where multiple users attempt to purchase the last remaining item simultaneously. Without proper concurrency control, this leads to **"Overselling"** (selling more items than physically available).
 
-✅ Data Consistency: When 100 users attempt to purchase the last 10 items, only 10 orders should succeed, while the other 90 must receive a “Stock Unavailable” message.
+This project solves this problem by enforcing **ACID properties** and implementing **Pessimistic Locking**. It includes a full database schema, audit logging, and a multi-threaded Python stress-testing script to empirically prove the system's reliability.
 
-✅ Full Traceability: Every inventory change (inbound or outbound) must have a detailed and auditable transaction record.
+---
 
-🏗️ Phase 1: Database Design (Foundation)
+## 1. Database Architecture & Design Principles
 
-The database design follows the normalization principles outlined in Doc 9: Database Design Basics.
-It consists of six core tables:
+The database schema adheres to normalization principles and consists of six core tables. The design focuses on data integrity, constraints, and auditability.
 
-1️⃣ Products
+### Core Tables and Design Rationale
 
-Stores product metadata such as a unique product ID, SKU code, and product name.
+#### A. Static Data: `products` & `warehouses`
+These tables store metadata.
+* **Key Data in Project:** We utilize Product ID `5` (iPhone 15 Pro 256GB) and Warehouse ID `1` (Bishkek Central) for all testing scenarios.
 
-2️⃣ Warehouses
+#### B. State Management: `inventory`
+* **Function:** Tracks the *current* snapshot of stock.
+* **Design Choice:** Uses a composite primary key `(product_id, warehouse_id)`.
+* **Critical Constraint:** We applied a database-level constraint `CHECK (quantity_on_hand >= 0)`.
+    * *Why?* This serves as the final line of defense. Even if the application logic fails, the database kernel will physically reject any transaction that attempts to make stock negative.
 
-Contains warehouse information, including warehouse ID and location name (e.g., “Bishkek Central Warehouse”).
+#### C. Business Logic: `customer_orders` & `order_items`
+* **Function:** Records the business intent (Who bought what).
+* **Design Choice:** Separating headers and items allows for complex orders. The `order_status` field ('Pending', 'Fulfilled') allows us to track transaction success during stress testing.
 
-3️⃣ Inventory – Core Table 1
+#### D. The Ledger: `stock_movements`
+* **Function:** Records the *history* of every stock change (Immutable Ledger).
+* **Design Choice:** Every `INSERT` into this table must happen in the same transaction as the `inventory` update.
+* **Role in Verification:** This table is crucial for the "Logic Loop." In our final test, we verify correctness by summing up these records. If Inventory drops by 5, the sum of movements must be exactly -5.
 
-Tracks the current quantity of each product in each warehouse.
-It uses a composite primary key (product_id, warehouse_id) to ensure that each product–warehouse combination appears only once.
-A non-negative constraint enforces that inventory quantities can never drop below zero.
-This table represents the current state of inventory.
+---
 
-4️⃣ Customer Orders
+## 2. Solving the Concurrency Challenge (Phase 3)
 
-Stores the main order information, including order ID, customer name, order status, and creation time.
-Order status values include: Pending, Fulfilled, and Cancelled.
+The core technical challenge is handling outbound logic when traffic spikes.
 
-5️⃣ Order Items
+### The Problem: Race Condition
+If User A and User B both read `quantity_on_hand = 1` at the same time, both logic checks pass (`1 >= 1`), and both issue an `UPDATE`. The stock becomes `-1` (or the second write overwrites the first).
 
-Lists the details of each product within an order, including the product ID and the quantity requested by the customer.
-Each item must request a strictly positive quantity.
+### The Solution: Pessimistic Locking
+We utilize PostgreSQL's `SELECT ... FOR UPDATE` mechanism. This logic is implemented in the Python application layer.
 
-6️⃣ Stock Movements – Core Table 2
+**Implementation Logic:**
+1.  **Begin Transaction.**
+2.  **Lock the Row:** Query the inventory for Product `5` in Warehouse `1` using `FOR UPDATE`.
+    * *Effect:* The database locks this specific row. Any other thread attempting to read this row must wait until the current transaction Commits or Rollbacks.
+3.  **Check Logic:** Calculate `current_stock - requested_qty`.
+4.  **Commit or Rollback:**
+    * If sufficient: `UPDATE` inventory, `INSERT` movement, `COMMIT`.
+    * If insufficient: `ROLLBACK`.
 
-Serves as the ledger that records every stock movement event.
-Each record contains the affected product and warehouse, the quantity change (positive for inbound, negative for outbound), the reason for the change (e.g., “Purchase Order” or “Customer Order”), and the timestamp of the movement.
+---
 
-The Inventory table shows the “current snapshot,” while Stock Movements provides the “historical truth.”
-At any point, the total of all stock movements should match the quantity in the inventory table, ensuring full data integrity and auditability.
+## 3. Stress Testing & Verification (Phase 5)
 
-🧱 Phase 2: Inbound Logic (The Easy Part)
+To prove the system design works, we developed a Python script (`wms_test.py`) to simulate a high-concurrency "Flash Sale" scenario.
 
-Inbound operations are relatively simple because they rarely face concurrency conflicts.
-However, they must be handled transactionally to ensure ACID atomicity.
+### Test Scenario
+* **Initial State:** Inventory for "iPhone 15 Pro" is reset to **5 units**.
+* **Load:** **20 concurrent users** (threads) are spawned instantly via Python's `threading` library.
+* **Action:** Each user attempts to purchase **1 unit**.
 
-In an inbound scenario, when new goods arrive at the warehouse, both the Inventory and Stock Movements tables must be updated together within a single transaction.
+### Python Implementation Details
+The script uses `psycopg2` to manage database connections. Below is the critical locking logic extracted from `wms_test.py`:
 
-If either update fails (for example, a system or disk error occurs), the entire transaction must roll back, ensuring that no “phantom stock” appears without a matching movement record.
-This guarantees strong data consistency.
+```python
+# Snippet from wms_test.py
+cur.execute("""
+    SELECT quantity_on_hand 
+    FROM inventory 
+    WHERE product_id = %s AND warehouse_id = %s 
+    FOR UPDATE;
+""", (PRODUCT_ID, WAREHOUSE_ID))
+```
+### Empirical Results
+After running the script, the system produced the following results, closing the logic loop:
 
-⚔️ Phase 3: Outbound Logic (The Concurrency Challenge)
-Problem: Race Condition
+1.  **Inventory Check:**
+    * *Expectation:* Stock should drop from 5 to 0, not -15.
+    * *Result:* `SELECT quantity_on_hand FROM inventory WHERE product_id=5` returned **0**.
+    
+2.  **Order Success Rate:**
+    * *Expectation:* Exactly 5 users should receive success messages.
+    * *Result:* The Python log showed 5 "Success" messages and 15 "Stock Unavailable" messages.
+    * *Database Proof:* `SELECT COUNT(*) FROM customer_orders WHERE order_status='Fulfilled'` returned **5**.
 
-When two or more users try to purchase the same product simultaneously, they may all read the same available quantity before any of their updates commit.
-This can result in overselling, where multiple successful orders are created for stock that does not exist.
+3.  **Audit Trail Verification:**
+    * *Expectation:* The ledger must reflect the exact outflow.
+    * *Database Proof:* `SELECT COUNT(*) FROM stock_movements` returned **5 records**, each with a change of `-1`.
 
-Correct Approach: Pessimistic Locking
+---
 
-To ensure concurrency safety, the system must use row-level locks when reading and modifying inventory.
-A locking query such as “SELECT … FOR UPDATE” in PostgreSQL prevents other concurrent transactions from modifying or locking the same row until the current transaction finishes.
+## 4. How to Run This Project
 
-This ensures that only one transaction can reduce the stock of a specific product in a specific warehouse at any given time.
-
-If sufficient inventory is available, the system safely updates the quantity, records a stock movement, and fulfills the order.
-If the inventory is insufficient, the transaction is rolled back, and the customer receives a “Stock Unavailable” message.
-
-This locking mechanism guarantees true concurrency safety.
-
-📊 Phase 4: Advanced Querying (Analytical Insights)
-
-Once the database is populated with transactional data, it can support advanced business analytics.
-
-1️⃣ Available-to-Sell (ATS)
-
-“Available stock” is not always equal to “quantity on hand.”
-If certain quantities are already allocated to pending orders, the true sellable stock should subtract those allocations.
-
-A Common Table Expression (CTE) can be used to calculate all pending allocations and then determine the available-to-sell quantity for each product.
-
-2️⃣ 30-Day Rolling Average Sales
-
-Using window functions, the system can compute the rolling 30-day average of daily sales per product.
-This helps forecast replenishment needs and supports automated restocking strategies.
-
-Such analytical queries transform the operational database into a decision-support tool for inventory optimization.
-
-⚡ Phase 5: Concurrency Stress Testing (Proof of Correctness)
-
-This final phase empirically proves the concurrency safety of the system.
-
-Test Setup
-
-Insert a test product into the inventory table with an initial quantity of 100.
-
-Write a test script (in Python, Node.js, or Go) that spawns 200 concurrent threads or processes, each attempting to purchase one unit of the test product.
-
-Each thread follows the full transaction logic defined in the concurrency-safe outbound process.
-
-Validation Criteria
-
-After running the test, the following conditions must all be true:
-
-The final inventory quantity equals 0.
-
-Exactly 100 orders have the status Fulfilled.
-
-The total of all stock movement records equals –100.
-
-No inventory record has a negative quantity.
-
-If all these results hold, the system is physically concurrency-safe.
-
-⚙️ Performance Optimization (Indexing Strategy)
-
-While primary and foreign keys automatically generate indexes, additional indexes can significantly improve query performance—particularly during Phase 4’s analytical queries.
-
-A composite index on (product_id, movement_time) in the Stock Movements table accelerates time-based aggregation and rolling average calculations.
-
-An index on product_id in the Order Items table speeds up the computation of pending allocations during the Available-to-Sell (ATS) query.
-
-These optimizations ensure that analytical performance scales efficiently even as data volume grows.
-
-✅ Conclusion
-
-This project demonstrates a complete design and implementation of a real-time, concurrency-safe Warehouse Management System (WMS) with:
-
-Transactional integrity and ACID compliance
-
-Strict data constraints preventing negative stock
-
-Comprehensive auditability through movement logs
-
-Concurrency-safe outbound processing using pessimistic locking
-
-High-performance analytical querying with indexing optimization
-
-Passing the final stress test validates the system’s physical concurrency safety, proving that your database design and implementation achieve both theoretical correctness and real-world reliability.
+### Prerequisites
+* PostgreSQL (Local or Remote)
+* Python 3.x
+* Library: `psycopg2-binary`
+
+### Steps
+1.  **Initialize Database:**
+    Import the provided SQL dump to create the schema and initial data.
+    ```bash
+    psql -U <username> -d wms_project -f wms_database_dump.sql
+    ```
+
+2.  **Configure Connection:**
+    Open `wms_test.py` and update the `DB_PARAMS` dictionary with your local database credentials.
+
+3.  **Run the Stress Test:**
+    ```bash
+    python3 wms_test.py
+    ```
+
+4.  **Verify Data:**
+    Check the terminal output for the verification report, or inspect the tables manually using pgAdmin/psql to see the resulting transaction logs.
