@@ -11,6 +11,7 @@ This project solves this problem by enforcing **ACID properties** and implementi
 ---
 
 ## 1. Database Architecture & Design Principles
+<img width="933" height="718" alt="Screenshot 2025-11-30 at 21 02 40" src="https://github.com/user-attachments/assets/cbe1971f-c07d-4cd0-b88c-2d3301a639cf" />
 
 The database schema adheres to normalization principles and consists of six core tables. The design focuses on data integrity, constraints, and auditability.
 
@@ -96,9 +97,60 @@ After running the script, the system produced the following results, closing the
     * *Database Proof:* `SELECT COUNT(*) FROM stock_movements` returned **5 records**, each with a change of `-1`.
 
 ---
-<img width="1312" height="739" alt="Screenshot 2025-11-29 at 22 49 47" src="https://github.com/user-attachments/assets/60890268-18b9-43a8-9d61-1ed33979c011" />
+### 4. Empirical Test Results (Log Evidence)
 
-## 4. How to Run This Project
+The following database logs demonstrate the successful handling of the concurrency test.
+
+**1. Verification of Order Success:**
+We queried for a specific user (User-19) who was lucky enough to grab an item.
+```sql
+wms_project=# SELECT * FROM customer_orders WHERE customer_name = 'User-19';
+ order_id | customer_name | order_status |         created_at         
+----------+---------------+--------------+----------------------------
+        4 | User-19       | Fulfilled    | 2025-11-29 22:13:44.693254
+(1 row)
+```
+
+**2. Verification of Inventory Integrity:**
+After the stress test (20 users fighting for 5 items), the inventory correctly dropped to exactly 0.
+```sql
+wms_project=# SELECT * FROM inventory WHERE product_id = 5;
+ product_id | warehouse_id | quantity_on_hand 
+------------+--------------+------------------
+          5 |            1 |                0
+(1 row)
+```
+
+**3. Audit Trail Verification:**
+The `stock_movements` table captured exactly 5 transactions. Note the timestamps are nearly identical, proving high concurrency.
+```sql
+wms_project=# SELECT * FROM stock_movements ORDER BY movement_id DESC LIMIT 5;
+ movement_id | product_id | warehouse_id | quantity_change |      reason       |       movement_time        
+-------------+------------+--------------+-----------------+-------------------+----------------------------
+           7 |          5 |            1 |              -1 | Order 3 Fulfilled | 2025-11-29 22:13:44.691311
+           6 |          5 |            1 |              -1 | Order 8 Fulfilled | 2025-11-29 22:13:44.717809
+           5 |          5 |            1 |              -1 | Order 6 Fulfilled | 2025-11-29 22:13:44.703467
+           4 |          5 |            1 |              -1 | Order 7 Fulfilled | 2025-11-29 22:13:44.707031
+           3 |          5 |            1 |              -1 | Order 4 Fulfilled | 2025-11-29 22:13:44.693254
+(5 rows)
+```
+---
+## 4. Backup & Recovery Strategy
+
+To ensure data persistence and disaster recovery, the project employs the following strategy:
+
+**1. Logical Backups (pg_dump):**
+Full database snapshots are taken using PostgreSQL's standard `pg_dump` utility. This exports the schema and data into a portable SQL file (Plain Text format), allowing for version control and migration between different servers.
+* **Command:** `pg_dump -U <username> wms_project > backup.sql`
+
+**2. Recovery Strategy:**
+In case of system failure or data corruption, the database can be restored to the latest snapshot using the `psql` utility.
+* **Command:** `psql -U <username> -d wms_project -f backup.sql`
+
+---
+
+
+## 5. How to Run This Project
 
 ### Prerequisites
 * PostgreSQL (Local or Remote)
