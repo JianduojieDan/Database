@@ -97,7 +97,7 @@ After running the script, the system produced the following results, closing the
     * *Database Proof:* `SELECT COUNT(*) FROM stock_movements` returned **5 records**, each with a change of `-1`.
 
 ---
-### 4. Empirical Test Results (Log Evidence)
+### Empirical Test Results (Log Evidence)
 
 The following database logs demonstrate the successful handling of the concurrency test.
 
@@ -135,7 +135,16 @@ wms_project=# SELECT * FROM stock_movements ORDER BY movement_id DESC LIMIT 5;
 (5 rows)
 ```
 ---
-## 4. Backup & Recovery Strategy
+## 4. Advanced Analytics & Optimization
+
+Beyond transaction processing, the project includes advanced SQL capabilities for business intelligence (See `analysis_queries.sql` in the repository).
+
+* **Indexing:** Created custom indexes on `stock_movements(movement_time)` to optimize historical query performance.
+* **Common Table Expressions (CTEs):** Used to calculate "Available-to-Sell" inventory by subtracting pending allocations from physical stock.
+* **Window Functions:** Implemented rolling average calculations to analyze sales trends over time.
+
+---
+## 5. Backup & Recovery Strategy
 
 To ensure data persistence and disaster recovery, the project employs the following strategy:
 
@@ -150,7 +159,7 @@ In case of system failure or data corruption, the database can be restored to th
 ---
 
 
-## 5. How to Run This Project
+## 6. How to Run This Project
 
 ### Prerequisites
 * PostgreSQL (Local or Remote)
