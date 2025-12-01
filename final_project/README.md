@@ -184,4 +184,4 @@ In case of system failure or data corruption, the database can be restored to th
 4.  **Verify Data:**
     Check the terminal output for the verification report, or inspect the tables manually using pgAdmin/psql to see the resulting transaction logs.
 
-## you pledge to meet all deadlines and will accept disciplinary action for failing to do so.
+## I pledge to meet all deadlines and will accept disciplinary action for failing to do so.
