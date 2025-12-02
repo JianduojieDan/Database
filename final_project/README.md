@@ -35,7 +35,7 @@ These tables store metadata.
 * **Function:** Records the *history* of every stock change (Immutable Ledger).
 * **Design Choice:** Every `INSERT` into this table must happen in the same transaction as the `inventory` update.
 * **Role in Verification:** This table is crucial for the "Logic Loop." In our final test, we verify correctness by summing up these records. If Inventory drops by 5, the sum of movements must be exactly -5.
-<img width="441" height="481" alt="sql_design_and_relationship drawio" src="https://github.com/user-attachments/assets/575d3c67-9310-4bee-8f16-e226d1821661" />
+<img width="959" height="1124" alt="Screenshot 2025-12-02 at 08 38 11" src="https://github.com/user-attachments/assets/ffc15683-568c-4a8a-a38e-d24117632459" />
 
 ---
 
