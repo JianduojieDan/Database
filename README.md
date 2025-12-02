@@ -7,6 +7,7 @@ The objective of this project is to design and implement a high-concurrency, tra
 In a real-world e-commerce environment, a critical challenge is the **"Race Condition,"** where multiple users attempt to purchase the last remaining item simultaneously. Without proper concurrency control, this leads to **"Overselling"** (selling more items than physically available).
 
 This project solves this problem by enforcing **ACID properties** and implementing **Pessimistic Locking**. It includes a full database schema, audit logging, and a multi-threaded Python stress-testing script to empirically prove the system's reliability.
+<img width="603" height="494" alt="Screenshot 2025-12-01 at 11 43 02" src="https://github.com/user-attachments/assets/292b24ea-8fa8-4909-9168-4583a4191e02" />
 
 ---
 
@@ -35,6 +36,7 @@ These tables store metadata.
 * **Function:** Records the *history* of every stock change (Immutable Ledger).
 * **Design Choice:** Every `INSERT` into this table must happen in the same transaction as the `inventory` update.
 * **Role in Verification:** This table is crucial for the "Logic Loop." In our final test, we verify correctness by summing up these records. If Inventory drops by 5, the sum of movements must be exactly -5.
+<img width="959" height="1124" alt="Screenshot 2025-12-02 at 08 38 11" src="https://github.com/user-attachments/assets/ffc15683-568c-4a8a-a38e-d24117632459" />
 
 ---
 
@@ -183,3 +185,5 @@ In case of system failure or data corruption, the database can be restored to th
 
 4.  **Verify Data:**
     Check the terminal output for the verification report, or inspect the tables manually using pgAdmin/psql to see the resulting transaction logs.
+
+## I pledge to meet all deadlines and will accept disciplinary action for failing to do so.
