@@ -7,6 +7,7 @@ The objective of this project is to design and implement a high-concurrency, tra
 In a real-world e-commerce environment, a critical challenge is the **"Race Condition,"** where multiple users attempt to purchase the last remaining item simultaneously. Without proper concurrency control, this leads to **"Overselling"** (selling more items than physically available).
 
 This project solves this problem by enforcing **ACID properties** and implementing **Pessimistic Locking**. It includes a full database schema, audit logging, and a multi-threaded Python stress-testing script to empirically prove the system's reliability.
+<img width="603" height="494" alt="Screenshot 2025-12-01 at 11 43 02" src="https://github.com/user-attachments/assets/292b24ea-8fa8-4909-9168-4583a4191e02" />
 
 ---
 
